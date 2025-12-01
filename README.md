@@ -2,86 +2,72 @@
 
 Lightweight installer and configuration bundle to deploy a Shibboleth Identity Provider (IdP) on Tomcat 10 (Debian/Ubuntu). The repository contains a prepared Tomcat systemd unit, Tomcat configuration, Shibboleth IdP config snippets and an installer script that performs the installation and basic configuration.
 
+IMPORTANT: Fill required variables in install.sh before running
+- This installer expects you to pre-fill configuration variables at the top of install.sh. The script does not prompt for these values at runtime. Edit install.sh and set:
+  - HOSTNAME — server hostname (e.g. idp.example.org)
+  - LDAPHOST — LDAP server (e.g. ldap.example.org)
+  - LDAPDN — LDAP domain (e.g. example.org)
+  - LDAPBASE — LDAP base DN (e.g. OU=Account,DC=example,DC=org)
+  - LDAPUSER — LDAP bind user (e.g. user@example.org)
+  - LDAPPASS — LDAP bind password
+  - Optional installer variables you may want to adjust:
+    - IDP_VERSION (default 5.1.6)
+    - KP_PASSWORD and SP_PASSWORD (keypair/service passwords used during IdP install)
+    - IDP_INSTALL_DIR (default /opt/shibboleth-idp)
+    - TOMCAT_SERVICE (default tomcat10)
+
+See the "Important variables in the installer" section below for locations.
+
 ## Summary
 
-- Installer: [install.sh](install.sh) — prompts for host and LDAP values, installs packages, downloads the IdP, and deploys configuration.
-- IdP target directory: [`IDP_INSTALL_DIR` in install.sh](`install.sh`) — default `/opt/shibboleth-idp`.
-- IdP version downloaded: [`IDP_VERSION` in install.sh](`install.sh`) — default `5.1.6`.
-- Tomcat service overridden by: [tomcat10.service](tomcat10.service).
-- Tomcat configuration: [catalina.properties](catalina.properties) and [server.xml](server.xml).
-- LDAP template: [ldap.properties.template](ldap.properties.template) — processed with envsubst by the installer.
-- Required local files: [`REQUIRED_FILES` in install.sh](`install.sh`) — ensure these exist before running.
+- Installer: install.sh — checks for root, required files, installs packages, downloads the IdP, and deploys configuration.
+- IdP target directory: configured by IDP_INSTALL_DIR in install.sh (default `/opt/shibboleth-idp`).
+- IdP version: configured by IDP_VERSION in install.sh (default `5.1.6`).
+- Tomcat service override, Tomcat configs and IdP fragments are provided in the repo.
 
 ## Quick start / Usage
 
-1. Place the required files in the repository root:
+1. Edit install.sh and set the required variables (see IMPORTANT above).
+2. Place the required files in the repository root:
    - foo.p12, tomcat10.service, catalina.properties, server.xml, idp.xml, services.xml, attribute-resolver.xml, ldap.properties.template, relying-party.xml
-   See [`REQUIRED_FILES`](install.sh) in [install.sh](install.sh).
-
-2. Make the installer executable and run as root:
+3. Make the installer executable and run as root:
 ```sh
 sudo bash ./install.sh
 ```
-
-3. Follow the interactive prompts:
-   - Enter server HOSTNAME (e.g. idp.example.org)
-   - Enter LDAP host, domain, baseDN, user and password
-
 4. After successful run:
-   - Shibboleth IdP is installed at the path set in [`IDP_INSTALL_DIR`](install.sh) (default: `/opt/shibboleth-idp`).
-   - Access the IdP at: https://<HOSTNAME>/idp/shibboleth
-   - Tomcat service name used by the script: [`TOMCAT_SERVICE`](install.sh) (default: `tomcat10`)
+   - Shibboleth IdP is installed at `${IDP_INSTALL_DIR}`.
+   - Access the IdP at: https://${HOSTNAME}/idp/shibboleth
 
-## Configuration
+## Configuration notes
 
-- LDAP configuration is generated from [ldap.properties.template](ldap.properties.template) by the installer (uses envsubst).
-- Credentials keystore: move your PKCS#12 file to `foo.p12` in the repo root before running — installer will place it in Tomcat credentials.
-- You can edit the following files to customize Tomcat and IdP behavior before installing:
-  - [catalina.properties](catalina.properties)
-  - [server.xml](server.xml)
-  - [idp.xml](idp.xml)
-  - [services.xml](services.xml)
-  - [attribute-resolver.xml](attribute-resolver.xml)
-  - [relying-party.xml](relying-party.xml)
-  - [tomcat10.service](tomcat10.service)
+- ldap.properties.template is processed with envsubst by the installer; ensure LDAP variables are set in install.sh.
+- The PKCS#12 keystore file must be present as foo.p12 and will be moved into Tomcat credentials by the script.
+- The installer clones java-idp-tomcat-base and copies libraries into Tomcat lib.
 
 ## Files in this repository
 
-- [install.sh](install.sh) — installer script (checks for root, required files, prompts for values, installs packages, downloads and installs IdP).
-- [ldap.properties.template](ldap.properties.template) — template used to generate `${IDP_INSTALL_DIR}/conf/ldap.properties`.
-- [catalina.properties](catalina.properties) — Tomcat configuration used by the installer.
-- [server.xml](server.xml) — Tomcat connectors and SSL config.
-- [tomcat10.service](tomcat10.service) — systemd unit file deployed to override default Tomcat.
-- [idp.xml](idp.xml) — Tomcat context for the IdP webapp.
-- [services.xml](services.xml) — Shibboleth services configuration.
-- [attribute-resolver.xml](attribute-resolver.xml) — attribute resolver definitions.
-- [relying-party.xml](relying-party.xml) — relying party defaults.
-- [README.md](README.md) — this file.
+- install.sh — installer script (edit variables at top before running).
+- ldap.properties.template, catalina.properties, server.xml, tomcat10.service, idp.xml, services.xml, attribute-resolver.xml, relying-party.xml — configuration fragments used by the installer.
 
-## Important variables in the installer
+## Important variables in the installer (edit before run)
 
-- [`IDP_VERSION`](install.sh) — version to download.
-- [`IDP_INSTALL_DIR`](install.sh) — installation target (default `/opt/shibboleth-idp`).
-- [`KP_PASSWORD`](install.sh) and [`SP_PASSWORD`](install.sh) — keypair and service provider passwords used during IdP install.
-- [`REQUIRED_FILES`](install.sh) — list of files the installer requires.
-- [`TOMCAT_SERVICE`](install.sh) — tomcat service name used to stop/start.
+- HOSTNAME, LDAPHOST, LDAPDN, LDAPBASE, LDAPUSER, LDAPPASS — required and must be set.
+- IDP_VERSION, KP_PASSWORD, SP_PASSWORD, IDP_INSTALL_DIR, TOMCAT_SERVICE — optional defaults in install.sh; change if needed.
 
-## Notes & troubleshooting
+## Troubleshooting
 
-- The installer must be run as root (it checks `$EUID`).
-- The installer installs packages via apt (OpenJDK 17, tomcat10, git, wget).
-- The script clones `java-idp-tomcat-base` and copies Tomcat libs into `/var/lib/tomcat10/lib/`.
+- Script must be run as root (checks $EUID).
+- Uses apt to install packages (openjdk-17-jre, tomcat10, git, wget).
 - If systemd does not pick up the custom unit file, run:
 ```sh
 systemctl daemon-reload
 systemctl restart tomcat10
 ```
-- If you need to change the IdP version or install directory, edit the variables in [install.sh](install.sh) before running.
 
 ## License
 
-Project content is configuration and scripts for local deployment. Check licences of upstream components (Tomcat, Shibboleth IdP, Java).
+Configuration and scripts for local deployment. Verify upstream licenses for Tomcat, Shibboleth IdP and Java.
 
-## Contact / Further customization
+## Further customization
 
-Edit the files listed above to adapt SSL, Tomcat connectors, LDAP search filters and attribute mappings before running the installer. For advanced customization refer to Shibboleth IdP documentation.
+Edit Tomcat and IdP config fragments in the repository before running the installer to adapt SSL, connectors, LDAP filters and attribute mappings.

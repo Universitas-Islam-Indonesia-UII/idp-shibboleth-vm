@@ -1,8 +1,23 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# Simple Shibboleth IdP + Tomcat10 installer
+# Usage: sudo ./install.sh
 
-# Simple Shibboleth IdP + Tomcat10 installer with sanity checks
-# Usage: sudo ./install-shib-idp.sh your.hostname.example
+# ======== Configuration - Fill in the variables below before running the script ========
+HOSTNAME="" # Enter server HOSTNAME (e.g. idp.example.org)
+LDAPHOST="" # Enter server LDAP (e.g. ldap.example.org)
+LDAPDN="" # Enter domain LDAP (e.g. example.org)
+LDAPBASE="" # Enter baseDN LDAP (e.g. OU=Account,DC=example,DC=org)
+LDAPUSER="" # Enter user LDAP (e.g. user@example.org)
+LDAPPASS="" # Enter password LDAP
+
+# ====== Configuration Variables ======
+IDP_VERSION="5.1.6"
+KP_PASSWORD="inikppassword"
+SP_PASSWORD="inisppassword"
+IDP_INSTALL_DIR="/opt/shibboleth-idp"
+TOMCAT_SERVICE="tomcat10"
+
+set -euo pipefail
 
 # ====== Required Local Files ======
 REQUIRED_FILES=(
@@ -13,7 +28,7 @@ REQUIRED_FILES=(
   "idp.xml"
   "services.xml"
   "attribute-resolver.xml"
-  "ldap.properties"
+  "ldap.properties.template"
   "relying-party.xml"
 )
 
@@ -22,54 +37,6 @@ if [[ $EUID -ne 0 ]]; then
   echo "❌ This script must be run as root." >&2
   exit 1
 fi
-
-# ====== Ask for HOSTNAME ======
-read -p "Enter server HOSTNAME (e.g. idp.example.org): " HOSTNAME
-if [[ -z "$HOSTNAME" ]]; then
-  echo "❌ HOSTNAME cannot be empty."
-  exit 1
-fi
-
-# ====== Ask for LDAP HOST ======
-read -p "Enter server LDAP (e.g. ldap.example.org): " LDAPHOST
-if [[ -z "$LDAPHOST" ]]; then
-  echo "❌ Server LDAP cannot be empty."
-  exit 1
-fi
-
-# ====== Ask for LDAP domain ======
-read -p "Enter domain LDAP (e.g. example.org): " LDAPDN
-if [[ -z "$LDAPDN" ]]; then
-  echo "❌ Domain LDAP cannot be empty."
-  exit 1
-fi
-
-# ====== Ask for LDAP BaseDN ======
-read -p "Enter baseDN LDAP (e.g. OU=Account,DC=example,DC=org): " LDAPBASE
-if [[ -z "$LDAPBASE" ]]; then
-  echo "❌ BaseDN LDAP cannot be empty."
-  exit 1
-fi
-
-# ====== Ask for LDAP User ======
-read -p "Enter user LDAP (e.g. user@example.org): " LDAPUSER
-if [[ -z "$LDAPHOST" ]]; then
-  echo "❌ User LDAP cannot be empty."
-  exit 1
-fi
-
-# ====== Ask for LDAP Password ======
-read -p "Enter password LDAP (e.g. idp.example.org): " LDAPPASS
-if [[ -z "$LDAPPASS" ]]; then
-  echo "❌ Password LDAP cannot be empty."
-  exit 1
-fi
-
-IDP_VERSION="5.1.6"
-KP_PASSWORD="inikppassword"
-SP_PASSWORD="inisppassword"
-IDP_INSTALL_DIR="/opt/shibboleth-idp"
-TOMCAT_SERVICE="tomcat10"
 
 echo "==> Performing sanity checks..."
 
