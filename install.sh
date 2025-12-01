@@ -23,13 +23,47 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-# ====== Check for hostname argument ======
-if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 HOSTNAME" >&2
+# ====== Ask for HOSTNAME ======
+read -p "Enter server HOSTNAME (e.g. idp.example.org): " HOSTNAME
+if [[ -z "$HOSTNAME" ]]; then
+  echo "❌ HOSTNAME cannot be empty."
   exit 1
 fi
 
-HOSTNAME="$1"
+# ====== Ask for LDAP HOST ======
+read -p "Enter server LDAP (e.g. ldap.example.org): " LDAPHOST
+if [[ -z "$LDAPHOST" ]]; then
+  echo "❌ Server LDAP cannot be empty."
+  exit 1
+fi
+
+# ====== Ask for LDAP domain ======
+read -p "Enter domain LDAP (e.g. example.org): " LDAPDN
+if [[ -z "$LDAPDN" ]]; then
+  echo "❌ Domain LDAP cannot be empty."
+  exit 1
+fi
+
+# ====== Ask for LDAP BaseDN ======
+read -p "Enter baseDN LDAP (e.g. OU=Account,DC=example,DC=org): " LDAPBASE
+if [[ -z "$LDAPBASE" ]]; then
+  echo "❌ BaseDN LDAP cannot be empty."
+  exit 1
+fi
+
+# ====== Ask for LDAP User ======
+read -p "Enter user LDAP (e.g. user@example.org): " LDAPUSER
+if [[ -z "$LDAPHOST" ]]; then
+  echo "❌ User LDAP cannot be empty."
+  exit 1
+fi
+
+# ====== Ask for LDAP Password ======
+read -p "Enter password LDAP (e.g. idp.example.org): " LDAPPASS
+if [[ -z "$LDAPPASS" ]]; then
+  echo "❌ Password LDAP cannot be empty."
+  exit 1
+fi
 
 IDP_VERSION="5.1.6"
 KP_PASSWORD="inikppassword"
@@ -111,7 +145,18 @@ chown -R tomcat: "${IDP_INSTALL_DIR}/"
 echo "==> Installing IdP configuration files..."
 cat services.xml > "${IDP_INSTALL_DIR}/conf/services.xml"
 cat attribute-resolver.xml > "${IDP_INSTALL_DIR}/conf/attribute-resolver.xml"
-cat ldap.properties > "${IDP_INSTALL_DIR}/conf/ldap.properties"
+envsubst < ldap.properties.template > "${IDP_INSTALL_DIR}/conf/ldap.properties"
+sed -i "s/myServicePassword/$LDAPPASS/g" /opt/shibboleth-idp/credentials/secrets.properties
+METADATA="${IDP_INSTALL_DIR}/metadata/idp-metadata.xml"
+TMP_METADATA="${METADATA}.tmp"
+awk -v ip="$HOSTNAME" '
+/<md:SingleLogoutService[[:space:]]+Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"[[:space:]]+Location="https:\/\/[^"]*\/idp\/profile\/SAML2\/SOAP\/ArtifactResolution"[[:space:]]*\/>/ {
+  print "<md:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"https://" ip "/idp/profile/SAML2/Redirect/SLO\" />";
+  print "<md:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"https://" ip "/idp/profile/SAML2/POST/SLO\" />";
+  print "<md:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign\" Location=\"https://" ip "/idp/profile/SAML2/POST-SimpleSign/SLO\" />";
+}
+{ print }
+' "$METADATA" > "$TMP_METADATA" && mv "$TMP_METADATA" "$METADATA"
 
 echo "==> Enabling Consent module..."
 /opt/shibboleth-idp/bin/module.sh -t idp.intercept.Consent || \
