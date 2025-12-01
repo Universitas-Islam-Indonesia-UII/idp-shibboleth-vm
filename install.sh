@@ -127,4 +127,4 @@ service "${TOMCAT_SERVICE}" start
 
 echo "==> ✅ Installation complete!"
 echo "Shibboleth IdP is installed at ${IDP_INSTALL_DIR}"
-echo "Access it at: https://${HOSTNAME}/idp"
+echo "Access it at: https://${HOSTNAME}/idp/shibboleth"
