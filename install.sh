@@ -112,7 +112,9 @@ chown -R tomcat: "${IDP_INSTALL_DIR}/"
 echo "==> Installing IdP configuration files..."
 cat services.xml > "${IDP_INSTALL_DIR}/conf/services.xml"
 cat attribute-resolver.xml > "${IDP_INSTALL_DIR}/conf/attribute-resolver.xml"
-envsubst < ldap.properties.template > "${IDP_INSTALL_DIR}/conf/ldap.properties"
+while IFS= read -r line; do
+    eval "echo \"$line\""
+done < ldap.properties.template > ldap.properties
 sed -i "s/myServicePassword/$LDAPPASS/g" /opt/shibboleth-idp/credentials/secrets.properties
 METADATA="${IDP_INSTALL_DIR}/metadata/idp-metadata.xml"
 TMP_METADATA="${METADATA}.tmp"
