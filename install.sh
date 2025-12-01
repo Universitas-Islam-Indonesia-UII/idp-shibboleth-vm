@@ -60,18 +60,8 @@ apt install -y openjdk-17-jre tomcat10 git wget
 echo "==> Stopping Tomcat..."
 service "${TOMCAT_SERVICE}" stop || true
 
-echo "==> Cloning java-idp-tomcat-base (branch 10.1)..."
-if [[ ! -d java-idp-tomcat-base ]]; then
-  git clone https://git.shibboleth.net/git/java-idp-tomcat-base
-fi
-(
-  cd java-idp-tomcat-base
-  git fetch --all
-  git checkout 10.1
-)
-
 echo "==> Copying IdP Tomcat base libraries..."
-cp ./java-idp-tomcat-base/tomcat-base/lib/* /var/lib/tomcat10/lib/
+cp ./tomcat-base/lib/* /var/lib/tomcat10/lib/
 
 echo "==> Setting up Tomcat credentials directory..."
 mkdir -p /var/lib/tomcat10/credentials
@@ -90,9 +80,6 @@ cat server.xml > /var/lib/tomcat10/conf/server.xml
 echo "==> Installing idp.xml context..."
 mkdir -p /var/lib/tomcat10/conf/Catalina/localhost
 cp idp.xml /var/lib/tomcat10/conf/Catalina/localhost/idp.xml
-
-echo "==> Downloading Shibboleth IdP ${IDP_VERSION}..."
-wget "https://shibboleth.net/downloads/identity-provider/${IDP_VERSION}/shibboleth-identity-provider-${IDP_VERSION}.tar.gz"
 
 echo "==> Extracting Shibboleth IdP..."
 tar -xzvf "shibboleth-identity-provider-${IDP_VERSION}.tar.gz"
