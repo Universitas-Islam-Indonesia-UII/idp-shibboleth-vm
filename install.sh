@@ -27,7 +27,6 @@ fi
 
 # ====== Required Local Files ======
 REQUIRED_FILES=(
-  "foo.p12"
   "tomcat10.service"
   "catalina.properties"
   "server.xml"
