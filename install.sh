@@ -31,7 +31,7 @@ REQUIRED_FILES=(
   "attribute-resolver.xml"
   "catalina.properties"
   "idp.xml"
-  "ldap.properties.template"
+  "ldap.properties"
   "metadata-providers.xml"
   "relying-party.xml"
   "server.xml"
@@ -53,7 +53,7 @@ echo "✅ All required files are present."
 
 # ====== Begin Installation ======
 echo "==> Change repository"
-sed -i 's|cdn.repo.cloudeka.id/ubuntu/|mirror.nevacloud.com/ubuntu/ubuntu-archive/|' /etc/apt/sources.list.d/ubuntu.sources
+sed -i 's|cdn.repo.cloudeka.id/ubuntu/|mirror.nevacloud.com/ubuntu/ubuntu-archive/|g' /etc/apt/sources.list.d/ubuntu.sources
 
 echo "==> Generating self-signed TLS cert for Tomcat"
 openssl req -x509 -newkey rsa:4096 \
@@ -114,8 +114,12 @@ cat services.xml > "${IDP_INSTALL_DIR}/conf/services.xml"
 cat attribute-filter.xml > "${IDP_INSTALL_DIR}/conf/attribute-filter.xml"
 cat attribute-resolver.xml > "${IDP_INSTALL_DIR}/conf/attribute-resolver.xml"
 cat metadata-providers.xml > "${IDP_INSTALL_DIR}/conf/metadata-providers.xml"
-envsubst < ldap.properties.template > "${IDP_INSTALL_DIR}/conf/ldap.properties"
-sed -i "s/myServicePassword/$LDAPPASS/g" /opt/shibboleth-idp/credentials/secrets.properties
+cat ldap.properties > "${IDP_INSTALL_DIR}/conf/ldap.properties"
+sed -i "s/LDAPHOST/${LDAPHOST}/g" "${IDP_INSTALL_DIR}/conf/ldap.properties"
+sed -i "s/LDAPBASE/${LDAPBASE}/g" "${IDP_INSTALL_DIR}/conf/ldap.properties"
+sed -i "s/LDAPUSER/${LDAPUSER}/g" "${IDP_INSTALL_DIR}/conf/ldap.properties"
+sed -i "s/LDAPDN/${LDAPDN}/g" "${IDP_INSTALL_DIR}/conf/ldap.properties"
+sed -i "s/myServicePassword/${LDAPPASS}/g" "${IDP_INSTALL_DIR}/credentials/secrets.properties"
 METADATA="${IDP_INSTALL_DIR}/metadata/idp-metadata.xml"
 TMP_METADATA="${METADATA}.tmp"
 awk -v ip="$HOSTNAME" '
