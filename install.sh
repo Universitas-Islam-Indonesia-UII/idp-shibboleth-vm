@@ -3,19 +3,19 @@
 # Usage: sudo ./install.sh
 
 # ======== Configuration - Fill in the variables below before running the script ========
-HOSTNAME="" # Enter server HOSTNAME (e.g. idp.example.org)
-LDAPHOST="" # Enter server LDAP (e.g. ldap.example.org)
-LDAPDN="" # Enter domain LDAP (e.g. example.org)
-LDAPBASE="" # Enter baseDN LDAP (e.g. OU=Account,DC=example,DC=org)
-LDAPUSER="" # Enter user LDAP (e.g. user@example.org)
-LDAPPASS="" # Enter password LDAP
+export HOSTNAME="" # Enter server HOSTNAME (e.g. idp.example.org)
+export LDAPHOST="" # Enter server LDAP (e.g. ldap.example.org)
+export LDAPDN="" # Enter domain LDAP (e.g. example.org)
+export LDAPBASE="" # Enter baseDN LDAP (e.g. OU=Account,DC=example,DC=org)
+export LDAPUSER="" # Enter user LDAP (e.g. user@example.org)
+export LDAPPASS="" # Enter password LDAP
 
 # ====== Configuration Variables ======
-IDP_VERSION="5.1.6"
-KP_PASSWORD="inikppassword"
-SP_PASSWORD="inisppassword"
-IDP_INSTALL_DIR="/opt/shibboleth-idp"
-TOMCAT_SERVICE="tomcat10"
+export IDP_VERSION="5.1.6"
+export KP_PASSWORD="inikppassword"
+export SP_PASSWORD="inisppassword"
+export IDP_INSTALL_DIR="/opt/shibboleth-idp"
+export TOMCAT_SERVICE="tomcat10"
 
 set -euo pipefail
 
@@ -112,9 +112,7 @@ chown -R tomcat: "${IDP_INSTALL_DIR}/"
 echo "==> Installing IdP configuration files..."
 cat services.xml > "${IDP_INSTALL_DIR}/conf/services.xml"
 cat attribute-resolver.xml > "${IDP_INSTALL_DIR}/conf/attribute-resolver.xml"
-while IFS= read -r line; do
-    eval "echo \"$line\""
-done < ldap.properties.template > ldap.properties
+envsubst < ldap.properties.template > "${IDP_INSTALL_DIR}/conf/ldap.properties"
 sed -i "s/myServicePassword/$LDAPPASS/g" /opt/shibboleth-idp/credentials/secrets.properties
 METADATA="${IDP_INSTALL_DIR}/metadata/idp-metadata.xml"
 TMP_METADATA="${METADATA}.tmp"
