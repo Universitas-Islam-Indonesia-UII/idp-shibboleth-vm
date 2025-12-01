@@ -27,14 +27,17 @@ fi
 
 # ====== Required Local Files ======
 REQUIRED_FILES=(
-  "tomcat10.service"
-  "catalina.properties"
-  "server.xml"
-  "idp.xml"
-  "services.xml"
+  "attribute-filter.xml"
   "attribute-resolver.xml"
+  "catalina.properties"
+  "idp.xml"
   "ldap.properties.template"
+  "metadata-providers.xml"
   "relying-party.xml"
+  "server.xml"
+  "services.xml"
+  "shibboleth-identity-provider-${IDP_VERSION}.tar.gz"
+  "tomcat10.service"
 )
 
 # ====== Check required files ======
@@ -108,7 +111,9 @@ chown -R tomcat: "${IDP_INSTALL_DIR}/"
 
 echo "==> Installing IdP configuration files..."
 cat services.xml > "${IDP_INSTALL_DIR}/conf/services.xml"
+cat attribute-filter.xml > "${IDP_INSTALL_DIR}/conf/attribute-filter.xml"
 cat attribute-resolver.xml > "${IDP_INSTALL_DIR}/conf/attribute-resolver.xml"
+cat metadata-providers.xml > "${IDP_INSTALL_DIR}/conf/metadata-providers.xml"
 envsubst < ldap.properties.template > "${IDP_INSTALL_DIR}/conf/ldap.properties"
 sed -i "s/myServicePassword/$LDAPPASS/g" /opt/shibboleth-idp/credentials/secrets.properties
 METADATA="${IDP_INSTALL_DIR}/metadata/idp-metadata.xml"
