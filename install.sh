@@ -19,6 +19,12 @@ export TOMCAT_SERVICE="tomcat10"
 
 set -euo pipefail
 
+# ====== Check for root ======
+if [[ $EUID -ne 0 ]]; then
+  echo "❌ This script must be run as root." >&2
+  exit 1
+fi
+
 # ====== Required Local Files ======
 REQUIRED_FILES=(
   "foo.p12"
@@ -32,15 +38,8 @@ REQUIRED_FILES=(
   "relying-party.xml"
 )
 
-# ====== Check for root ======
-if [[ $EUID -ne 0 ]]; then
-  echo "❌ This script must be run as root." >&2
-  exit 1
-fi
-
-echo "==> Performing sanity checks..."
-
 # ====== Check required files ======
+echo "==> Performing sanity checks..."
 for f in "${REQUIRED_FILES[@]}"; do
   if [[ ! -f "$f" ]]; then
     echo "❌ Missing required file: $f"
@@ -48,10 +47,19 @@ for f in "${REQUIRED_FILES[@]}"; do
     exit 1
   fi
 done
-
-echo "✓ All required files are present."
+echo "✅ All required files are present."
 
 # ====== Begin Installation ======
+echo "==> Generating self-signed TLS cert for Tomcat"
+openssl req -x509 -newkey rsa:4096 
+    -keyout key.pem \
+    -out cert.pem \
+    -days 365 -nodes \
+    -subj "/C=ID/ST=State/L=City/O=Organization/OU=Unit/CN=${HOSTNAME}/emailAddress=idp@${HOSTNAME}"
+openssl pkcs12 -in cert.pem -inkey key.pem \
+    -out foo.p12 \
+    -export -name friendly_name \
+    -passout pass:"12345"
 
 echo "==> Installing dependencies (OpenJDK 17 & Tomcat 10)..."
 apt update
