@@ -4,7 +4,7 @@ idp.authn.LDAP.useStartTLS                      = false
 idp.authn.LDAP.returnAttributes                 = passwordExpirationTime,loginGraceRemaining
 idp.authn.LDAP.baseDN                           = ${LDAPBASE}
 idp.authn.LDAP.userFilter                       = (sAMAccountName={user})
-idp.authn.LDAP.bindDN                           = ${LDAPUSER}@${LDAPDN}
+idp.authn.LDAP.bindDN                           = ${LDAPUSER}
 idp.authn.LDAP.dnFormat                         = %s@${LDAPDN}
 
 idp.attribute.resolver.LDAP.ldapURL             = %{idp.authn.LDAP.ldapURL}

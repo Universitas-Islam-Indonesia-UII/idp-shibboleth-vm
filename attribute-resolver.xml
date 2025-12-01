@@ -28,14 +28,6 @@
     <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.3.6.1.4.1.11023.1.1.7.2.1.11" friendlyName="memberOf" encodeType="false" />
   </AttributeDefinition>
 
-  <AttributeDefinition xsi:type="Simple" id="eduPersonOrgUnitDN">
-    <InputDataConnector ref="mysql" attributeNames="distinguishedName"/>
-    <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:eduPersonOrgUnitDN" encodeType="false" />
-    <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.3.6.1.4.1.5923.1.1.1.4" friendlyName="eduPersonOrgUnitDN" encodeType="false" />
-  </AttributeDefinition>
-
-
-
   <!-- ========================================== -->
   <!--	Active Directory Connectors               -->
   <!-- ========================================== -->
