@@ -21,5 +21,5 @@
                       http://www.w3.org/2009/xmlenc11# http://www.w3.org/TR/2013/REC-xmlenc-core1-20130411/xenc-schema-11.xsd"
   sortKey="1">
 
-  <MetadataProvider id="SP_HOSTNAME"  xsi:type="FilesystemMetadataProvider" metadataFile="%{idp.home}/metadata/sp.xml"/>
+  <MetadataProvider id="sp"  xsi:type="FilesystemMetadataProvider" metadataFile="%{idp.home}/metadata/sp.xml"/>
 </MetadataProvider>

@@ -71,7 +71,7 @@ apt update
 apt install -y openjdk-17-jre tomcat10 git wget
 
 echo "==> Stopping Tomcat..."
-service "${TOMCAT_SERVICE}" stop || true
+systemctl stop "${TOMCAT_SERVICE}".service || true
 
 echo "==> Copying IdP Tomcat base libraries..."
 cp ./tomcat-base/lib/* /var/lib/tomcat10/lib/
@@ -137,7 +137,7 @@ echo "==> Reloading systemd..."
 systemctl daemon-reload
 
 echo "==> Starting Tomcat..."
-service "${TOMCAT_SERVICE}" start
+systemctl start "${TOMCAT_SERVICE}".service
 
 echo "==> ✅ Installation complete!"
 echo "Shibboleth IdP is installed at ${IDP_INSTALL_DIR}"
