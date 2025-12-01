@@ -98,4 +98,33 @@ tar -xzvf "shibboleth-identity-provider-${IDP_VERSION}.tar.gz"
 rm -f "shibboleth-identity-provider-${IDP_VERSION}.tar.gz"
 
 echo "==> Running Shibboleth IdP installer..."
-"shibboleth-identity-provide
+"shibboleth-identity-provider-${IDP_VERSION}/bin/install.sh" \
+  -t "${IDP_INSTALL_DIR}" \
+  -h "${HOSTNAME}" \
+  --scope idp.id \
+  -e "https://${HOSTNAME}/idp/shibboleth" \
+  -kp "${KP_PASSWORD}" \
+  -sp "${SP_PASSWORD}"
+
+chown -R tomcat: "${IDP_INSTALL_DIR}/"
+
+echo "==> Installing IdP configuration files..."
+cat services.xml > "${IDP_INSTALL_DIR}/conf/services.xml"
+cat attribute-resolver.xml > "${IDP_INSTALL_DIR}/conf/attribute-resolver.xml"
+cat ldap.properties > "${IDP_INSTALL_DIR}/conf/ldap.properties"
+
+echo "==> Enabling Consent module..."
+/opt/shibboleth-idp/bin/module.sh -t idp.intercept.Consent || \
+/opt/shibboleth-idp/bin/module.sh -e idp.intercept.Consent
+
+cat relying-party.xml > "${IDP_INSTALL_DIR}/conf/relying-party.xml"
+
+echo "==> Reloading systemd..."
+systemctl daemon-reload
+
+echo "==> Starting Tomcat..."
+service "${TOMCAT_SERVICE}" start
+
+echo "==> ✅ Installation complete!"
+echo "Shibboleth IdP is installed at ${IDP_INSTALL_DIR}"
+echo "Access it at: https://${HOSTNAME}/idp"
