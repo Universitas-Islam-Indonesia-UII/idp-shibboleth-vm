@@ -11,7 +11,7 @@
               factory="org.apache.catalina.users.MemoryUserDatabaseFactory" pathname="conf/tomcat-users.xml" />
   </GlobalNamingResources>
   <Service name="Catalina">
-    <Connector address="${tomcat.http.host}" port="${tomcat.http.port}" protocol="HTTP/1.1" connectionTimeout="20000"/>
+    <Connector address="${tomcat.http.host}" port="${tomcat.http.port}" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="${tomcat.https.port}"/>
     <Connector address="${tomcat.https.host}" port="${tomcat.https.port}" protocol="org.apache.coyote.http11.Http11NioProtocol" SSLEnabled="true" scheme="https" secure="true">
       <SSLHostConfig>
         <Certificate certificateKeystoreFile="${tomcat.https.certificateKeystoreFile}" certificateKeystorePassword="${tomcat.https.certificateKeystorePassword}" type="RSA"/>

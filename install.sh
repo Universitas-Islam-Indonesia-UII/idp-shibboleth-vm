@@ -130,7 +130,6 @@ awk -v ip="${HOSTNAME}" '
 }
 { print }
 ' "${METADATA}" > "${TMP_METADATA}" && mv "${TMP_METADATA}" "${METADATA}"
-sed -i "s/https/http/g" "${METADATA}"
 
 echo "==> Enabling Consent module..."
 /opt/shibboleth-idp/bin/module.sh -t idp.intercept.Consent || \
@@ -146,4 +145,4 @@ systemctl start "${TOMCAT_SERVICE}.service"
 
 echo "==> ✅ Installation complete!"
 echo "Shibboleth IdP is installed at ${IDP_INSTALL_DIR}"
-echo "Access it at: http://${HOSTNAME}/idp/shibboleth"
+echo "Access it at: https://${HOSTNAME}/idp/shibboleth"
