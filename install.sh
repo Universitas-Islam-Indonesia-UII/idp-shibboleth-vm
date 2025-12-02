@@ -38,6 +38,8 @@ REQUIRED_FILES=(
   "services.xml"
   "shibboleth-identity-provider-${IDP_VERSION}.tar.gz"
   "tomcat10.service"
+  "uiiid.crt"
+  "uiiid.key"
 )
 
 # ====== Check required files ======
@@ -55,15 +57,11 @@ echo "✅ All required files are present."
 echo "==> Change repository"
 sed -i 's|cdn.repo.cloudeka.id/ubuntu/|mirror.amscloud.co.id/ubuntu/|g' /etc/apt/sources.list.d/ubuntu.sources
 
-echo "==> Generating self-signed TLS cert for Tomcat"
-openssl req -x509 -newkey rsa:4096 \
-    -keyout key.pem \
-    -out cert.pem \
-    -days 365 -nodes \
-    -subj "/C=ID/ST=State/L=City/O=Organization/OU=Unit/CN=${HOSTNAME}/emailAddress=idp@${HOSTNAME}"
-openssl pkcs12 -in cert.pem -inkey key.pem \
-    -out foo.p12 \
-    -export -name friendly_name \
+echo "==> Generating p12 cert for Tomcat"
+openssl pkcs12 -export -out uiiid.p12 \
+    -inkey uiiid.key \
+    -in uiiid.crt \
+    -name tomcat_ssl \
     -passout pass:"12345"
 
 echo "==> Installing dependencies (OpenJDK 17 & Tomcat 10)..."
@@ -78,7 +76,7 @@ cp ./tomcat-base/lib/* /var/lib/tomcat10/lib/
 
 echo "==> Setting up Tomcat credentials directory..."
 mkdir -p /var/lib/tomcat10/credentials
-mv foo.p12 /var/lib/tomcat10/credentials/idp-userfacing.p12
+mv uiiid.p12 /var/lib/tomcat10/credentials/idp-userfacing.p12
 chown -R tomcat: /var/lib/tomcat10/credentials
 
 echo "==> Installing custom tomcat10.service..."
