@@ -122,14 +122,15 @@ sed -i "s/LDAPDN/${LDAPDN}/g" "${IDP_INSTALL_DIR}/conf/ldap.properties"
 sed -i "s/myServicePassword/${LDAPPASS}/g" "${IDP_INSTALL_DIR}/credentials/secrets.properties"
 METADATA="${IDP_INSTALL_DIR}/metadata/idp-metadata.xml"
 TMP_METADATA="${METADATA}.tmp"
-awk -v ip="$HOSTNAME" '
+awk -v ip="${HOSTNAME}" '
 /<md:SingleLogoutService[[:space:]]+Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"[[:space:]]+Location="https:\/\/[^"]*\/idp\/profile\/SAML2\/SOAP\/ArtifactResolution"[[:space:]]*\/>/ {
   print "<md:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"https://" ip "/idp/profile/SAML2/Redirect/SLO\" />";
   print "<md:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"https://" ip "/idp/profile/SAML2/POST/SLO\" />";
   print "<md:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign\" Location=\"https://" ip "/idp/profile/SAML2/POST-SimpleSign/SLO\" />";
 }
 { print }
-' "$METADATA" > "$TMP_METADATA" && mv "$TMP_METADATA" "$METADATA"
+' "${METADATA}" > "${TMP_METADATA}" && mv "${TMP_METADATA}" "${METADATA}"
+sed -i "s/https/http/g" "${METADATA}"
 
 echo "==> Enabling Consent module..."
 /opt/shibboleth-idp/bin/module.sh -t idp.intercept.Consent || \
@@ -141,8 +142,8 @@ echo "==> Reloading systemd..."
 systemctl daemon-reload
 
 echo "==> Starting Tomcat..."
-systemctl start "${TOMCAT_SERVICE}".service
+systemctl start "${TOMCAT_SERVICE}.service"
 
 echo "==> ✅ Installation complete!"
 echo "Shibboleth IdP is installed at ${IDP_INSTALL_DIR}"
-echo "Access it at: https://${HOSTNAME}/idp/shibboleth"
+echo "Access it at: http://${HOSTNAME}/idp/shibboleth"

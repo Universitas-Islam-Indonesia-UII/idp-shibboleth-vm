@@ -4,8 +4,8 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="urn:mace:shibboleth:2.0:afp http://shibboleth.net/schema/idp/shibboleth-afp.xsd">
 	
-  <AttributeFilterPolicy id="https://SP_HOSTNAME/shibboleth">
-    <PolicyRequirementRule xsi:type="Requester" value="https://SP_HOSTNAME/shibboleth" />
+  <AttributeFilterPolicy id="http://SP_HOSTNAME/shibboleth">
+    <PolicyRequirementRule xsi:type="Requester" value="http://SP_HOSTNAME/shibboleth" />
     <AttributeRule attributeID="uid" permitAny="true" />
     <AttributeRule attributeID="mail" permitAny="true" />
     <AttributeRule attributeID="displayName" permitAny="true" />
