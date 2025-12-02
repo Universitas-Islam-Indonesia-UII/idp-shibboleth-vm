@@ -53,7 +53,7 @@ echo "✅ All required files are present."
 
 # ====== Begin Installation ======
 echo "==> Change repository"
-sed -i 's|cdn.repo.cloudeka.id/ubuntu/|mirror.nevacloud.com/ubuntu/ubuntu-archive/|g' /etc/apt/sources.list.d/ubuntu.sources
+sed -i 's|cdn.repo.cloudeka.id/ubuntu/|mirror.amscloud.co.id/ubuntu/|g' /etc/apt/sources.list.d/ubuntu.sources
 
 echo "==> Generating self-signed TLS cert for Tomcat"
 openssl req -x509 -newkey rsa:4096 \
