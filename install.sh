@@ -38,8 +38,8 @@ REQUIRED_FILES=(
   "services.xml"
   "shibboleth-identity-provider-${IDP_VERSION}.tar.gz"
   "tomcat10.service"
-  "uiiid.crt"
-  "uiiid.key"
+  "uiiid-fullchain.pem"
+  "uiiid-privkey.pem"
 )
 
 # ====== Check required files ======
@@ -59,9 +59,9 @@ sed -i 's|cdn.repo.cloudeka.id/ubuntu/|mirror.amscloud.co.id/ubuntu/|g' /etc/apt
 
 echo "==> Generating p12 cert for Tomcat"
 openssl pkcs12 -export -out uiiid.p12 \
-    -inkey uiiid.key \
-    -in uiiid.crt \
-    -name tomcat_ssl \
+    -inkey uiiid-privkey.pem \
+    -in uiiid-fullchain.pem \
+    -name tomcat \
     -passout pass:"12345"
 
 echo "==> Installing dependencies (OpenJDK 17 & Tomcat 10)..."
