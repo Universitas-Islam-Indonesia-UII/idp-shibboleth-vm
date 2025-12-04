@@ -101,7 +101,7 @@ echo "==> Running Shibboleth IdP installer..."
 "shibboleth-identity-provider-${IDP_VERSION}/bin/install.sh" \
   -t "${IDP_INSTALL_DIR}" \
   -h "${HOSTNAME}" \
-  --scope idp.id \
+  --scope uii.id \
   -e "https://${HOSTNAME}/idp/shibboleth" \
   -kp "${KP_PASSWORD}" \
   -sp "${SP_PASSWORD}"
